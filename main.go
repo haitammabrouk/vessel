@@ -20,10 +20,19 @@ func main() {
 func child() {
 	// start the child process inside the newly created namespaces
 	if os.Args[1] == "child" {
-		cmd := exec.Command("/bin/bash", "--noprofile", "--norc")
+		cmd := exec.Command("/bin/ash")
 		cmd.Stdin = os.Stdin
 		cmd.Stdout = os.Stdout
 		cmd.Stderr = os.Stderr
+
+		// make mount points private so that they don't propagate to the host
+		if err := unix.Mount("", "/", "", unix.MS_PRIVATE|unix.MS_REC, ""); err != nil {
+			fmt.Fprintf(os.Stderr, "Error making mount points private: %v\n", err)
+			os.Exit(1)
+		}
+
+		unix.Chroot("./rootfs")
+		unix.Chdir("/")
 
 		// mount the proc and associate it with the pid table of the new PID namespace
 		if err := unix.Mount("proc", "/proc", "proc", 0, ""); err != nil {
