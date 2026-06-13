@@ -27,10 +27,11 @@ func child() {
 
 		// make mount points private so that they don't propagate to the host
 		if err := unix.Mount("", "/", "", unix.MS_PRIVATE|unix.MS_REC, ""); err != nil {
-			fmt.Fprintf(os.Stderr, "Error making mount points private: %v\n", err)
+			fmt.Fprintf(os.Stderr, "Error setting mount propagation private: %v\n", err)
 			os.Exit(1)
 		}
 
+		// TODO improve this by using pivot root
 		unix.Chroot("./rootfs")
 		unix.Chdir("/")
 
