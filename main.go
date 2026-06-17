@@ -19,6 +19,7 @@ func main() {
 }
 
 func child() {
+
 	// swap root fs
 	pivotRoot()
 
@@ -73,6 +74,7 @@ func run() {
 
 func pivotRoot() error {
 	newRootFsPath, err := filepath.Abs("./rootfs")
+
 	if err != nil {
 		fmt.Fprintf(os.Stderr, "Error getting abs path of new rootfs: %v\n", err)
 		os.Exit(1)
@@ -112,6 +114,12 @@ func pivotRoot() error {
 	// umount old rootfs
 	if err := unix.Unmount("./old_root", unix.MNT_DETACH); err != nil {
 		fmt.Fprintf(os.Stderr, "Error umounting old rootfs: %v\n", err)
+		os.Exit(1)
+	}
+
+	// remove old rootfs
+	if err := os.RemoveAll("./old_root"); err != nil {
+		fmt.Fprintf(os.Stderr, "Error removing old rootfs: %v\n", err)
 		os.Exit(1)
 	}
 
