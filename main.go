@@ -22,12 +22,6 @@ func child() {
 
 	// swap root fs
 	pivotRoot()
-
-	// mount the proc and associate it with the pid table of the new PID namespace
-	if err := unix.Mount("proc", "/proc", "proc", 0, ""); err != nil {
-		fmt.Fprintf(os.Stderr, "Error mounting proc: %v\n", err)
-		os.Exit(1)
-	}
 	
 	cmd := exec.Command("/bin/ash")
 	cmd.Stdin = os.Stdin
@@ -73,21 +67,16 @@ func run() {
 }
 
 func pivotRoot() error {
-	newRootFsPath, err := filepath.Abs("./rootfs")
+	newRootFsPath, _ := filepath.Abs("./rootfs")
 
-	if err != nil {
-		fmt.Fprintf(os.Stderr, "Error getting abs path of new rootfs: %v\n", err)
-		os.Exit(1)
-	}
-
-	// make mount points private so that they don't propagate to the host
-	if err := unix.Mount("", "/", "", unix.MS_PRIVATE|unix.MS_REC, ""); err != nil {
+	// make mount points private so that they don't propagate
+	if err := unix.Mount("", "/", "", unix.MS_PRIVATE | unix.MS_REC, ""); err != nil {
 		fmt.Fprintf(os.Stderr, "Error setting mount propagation to private: %v\n", err)
 		os.Exit(1)
 	}
 
 	// making the new root fs mountable
-	if err := unix.Mount(newRootFsPath, newRootFsPath, "", unix.MS_BIND|unix.MS_REC, ""); err != nil {
+	if err := unix.Mount(newRootFsPath, newRootFsPath, "", unix.MS_BIND | unix.MS_REC, ""); err != nil {
 		fmt.Fprintf(os.Stderr, "Error making new rootfs mountable: %v\n", err)
 		os.Exit(1)
 	}
@@ -108,6 +97,12 @@ func pivotRoot() error {
 	// ensure cwd set to new root
 	if err := unix.Chdir("/"); err != nil {
 		fmt.Fprintf(os.Stderr, "Error setting the cwd to root: %v\n", err)
+		os.Exit(1)
+	}
+
+	// mount the proc and associate it with the pid table of the new PID namespace
+	if err := unix.Mount("proc", "/proc", "proc", 0, ""); err != nil {
+		fmt.Fprintf(os.Stderr, "Error mounting proc: %v\n", err)
 		os.Exit(1)
 	}
 
