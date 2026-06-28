@@ -4,6 +4,7 @@ import (
 	"os"
 	"os/exec"
 	"vessel/internal/namespace"
+	"vessel/internal/cgroup"
 )
 
 func Run() error {
@@ -15,5 +16,14 @@ func Run() error {
 	cmd.Stdout = os.Stdout
 	cmd.Stderr = os.Stderr
 
-	return cmd.Run()
+	if err := cmd.Start(); err != nil {
+		return err
+	}
+
+	pid := cmd.Process.Pid
+	if err := cgroup.SetUpCgroup(pid); err != nil {
+		return err
+	}
+
+	return cmd.Wait()
 }

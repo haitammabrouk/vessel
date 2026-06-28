@@ -3,10 +3,10 @@ package resources
 import ()
 
 type CpuMax struct {
-	quota int64
-	period int64
+	Quota  int64
+	Period int64
 }
 
 type Cpu struct {
-	max CpuMax
+	Max CpuMax
 }

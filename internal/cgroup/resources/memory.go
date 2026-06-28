@@ -3,17 +3,17 @@ package resources
 import ()
 
 type Memory struct {
-	min     int64
-	max     int64
+	Min     int64
+	Max     int64
 	swapMax int64
 }
 
-func (m *Memory) setMax(max int64) {
-	m.max = max
+func (m *Memory) setMax(Max int64) {
+	m.Max = Max
 }
 
-func (m *Memory) setMin(min int64) {
-	m.min = min
+func (m *Memory) setMin(Min int64) {
+	m.Min = Min
 }
 
 func (m *Memory) setSwapMax(swapMax int64) {
