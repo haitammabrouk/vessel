@@ -3,10 +3,14 @@ package container
 import (
 	"os"
 	"os/exec"
+	"vessel/internal/cgroup"
 )
 
 func Child() error {
-	// swap root fs
+	if err := cgroup.SetUpCgroup(os.Getpid()); err != nil {
+		return err
+	}
+
 	if err := setUpRootFs(); err != nil {
 		return err
 	}
