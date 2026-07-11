@@ -7,7 +7,7 @@ import (
 )
 
 func Run() error {
-	cmd := exec.Command("/proc/self/exe", "child")
+	cmd := exec.Command("/proc/self/exe", append([]string{"child"}, os.Args[2:]...)...)
 
 	cmd.SysProcAttr = namespace.SetUpNs()
 

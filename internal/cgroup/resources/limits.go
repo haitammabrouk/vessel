@@ -5,11 +5,6 @@ type Memory struct {
 	SwapMax int64
 }
 
-type Cpu struct {
-	Max  int64
-}
-
 type ResouceLimits struct {
 	Memory Memory
-	Cpu Cpu
 }

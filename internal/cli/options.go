@@ -1,18 +1,18 @@
 package cli
 
 import (
-	"fmt"
 	"flag"
+	"fmt"
+	"os"
 	"vessel/internal/cgroup/resources"
 	"vessel/internal/sizeconverter"
 )
 
 func ParseOptions() (resources.ResouceLimits, error) {
 	memoryMax := flag.String("memory", "", "memory limit")
-	memorySwapMax := flag.String("memory-max", "", "memory swap max")
-	cpuMax := flag.Int64("cpu", 0, "cpu max")
+	memorySwapMax := flag.String("memory-swap-max", "", "memory swap max")
 
-	flag.Parse()
+	flag.CommandLine.Parse(os.Args[2:])
 
 	memoryMaxInBytes, err := sizeconverter.ConvertSize(*memoryMax)
 	if err != nil {
@@ -27,6 +27,5 @@ func ParseOptions() (resources.ResouceLimits, error) {
 		Memory: resources.Memory{
 			Max: memoryMaxInBytes,
 			SwapMax: memorySwapMaxInBytes,
-		},
-		Cpu: resources.Cpu{Max: *cpuMax}}, nil
+		}}, nil
 }
