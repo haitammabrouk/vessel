@@ -34,7 +34,7 @@ go build -o bin/vessel ./cmd/vessel
 ### 3. Run the container
 
 ```bash
-./bin/vessel run
+sudo ./bin/vessel run
 ```
 
 If everything is configured correctly, you'll be dropped into an Alpine shell running inside its own namespaces.

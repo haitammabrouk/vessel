@@ -19,6 +19,8 @@ func SetUpCgroup(pid int) error {
 	if err != nil {
 		return err
 	}
+
+	// TODO set cgroup limits
 	return nil
 }
 
@@ -36,5 +38,14 @@ func addProcessToCgroup(myCgroupPath string, pid int) error {
 	if err != nil {
 		return fmt.Errorf("add current process to cgroup")
 	}
+	return nil
+}
+
+// TODO implement
+func SetUpMemoryLimits() error {
+	return nil
+}
+// TODO implement
+func SetCpuLimits() error {
 	return nil
 }
