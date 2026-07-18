@@ -72,6 +72,10 @@ func setUpRootFs() error {
 		return err
 	}
 
+	if err := mountCgroup2(); err != nil {
+		return err
+	}
+
 	if err := detachOldRootFs(); err != nil {
 		return err
 	}

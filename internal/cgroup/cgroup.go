@@ -1,12 +1,13 @@
 package cgroup
 
 import (
+	"fmt"
 	"os"
 	"path/filepath"
-	"fmt"
 	"strconv"
-	"vessel/internal/cli"
 	"vessel/internal/cgroup/resources"
+	"vessel/internal/cli"
+	"golang.org/x/sys/unix"
 )
 
 const cgroupFs = "/sys/fs/cgroup"
@@ -30,6 +31,10 @@ func SetUpCgroup(pid int) error {
 
 	if err = setMemoryLimits(resourceLimits.Memory); err != nil {
 		return err
+	}
+
+	if err = unix.Unshare(unix.CLONE_NEWCGROUP); err != nil {
+		return fmt.Errorf("unshare cgroup: %w", err)
 	}
 
 	return nil

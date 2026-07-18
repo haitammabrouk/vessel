@@ -18,3 +18,10 @@ func mountProcFs() error {
 	}
 	return nil
 }
+
+func mountCgroup2() error {
+	if err := unix.Mount("cgroup2", "/sys/fs/cgroup", "cgroup2", 0, ""); err != nil {
+		return fmt.Errorf("mount cgroupfs: %w", err)
+	}
+	return nil
+}
