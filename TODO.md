@@ -1,6 +1,6 @@
 # TODO
 
-Working today: PID + mount namespaces, cgroup v2 memory limits, pivot_root-based
+Working today: PID + mount namespaces + uts namespaces, cgroup v2 memory limits, pivot_root-based
 rootfs switch, hardcoded `/bin/ash` launch.
 
 ## 1. Namespace isolation (currently only PID + mount)
