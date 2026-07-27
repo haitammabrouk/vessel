@@ -10,10 +10,14 @@ import (
 	"golang.org/x/sys/unix"
 )
 
-const cgroupFs = "/sys/fs/cgroup"
+const cgroupFs = "/sys/fs/cgroup/vessel"
 var cgroupPath string
 
 func SetUpCgroup(pid int) error {
+	if err := setCgroupControllers(); err != nil {
+		return err
+	}
+
 	cgroupPath = filepath.Join(cgroupFs, "mycgroup")
 	if err := os.MkdirAll(cgroupPath, 0700); err != nil {
 		return fmt.Errorf("create cgroup: %w", err)
@@ -40,17 +44,29 @@ func SetUpCgroup(pid int) error {
 	return nil
 }
 
+func setCgroupControllers() error {
+	subTreeControllersPath := filepath.Join(cgroupFs, "cgroup.subtree_control")
+	subTreeControllersFile, err := os.OpenFile(subTreeControllersPath, os.O_WRONLY, 0)
+	if err != nil {
+		return fmt.Errorf("open cgroup's parent subtree controllers file: %w", err)
+	}
+	defer subTreeControllersFile.Close()
+
+	if _, err = subTreeControllersFile.WriteString("+memory"); err != nil {
+		return fmt.Errorf("set cgroup controllers: %w", err)
+	}
+	return nil
+}
+
 func addProcessToCgroup(pid int) error {
 	cgroupProcFilePath := filepath.Join(cgroupPath, "cgroup.procs")
 	cgroupProcFile, err := os.OpenFile(cgroupProcFilePath, os.O_WRONLY, 0)
-
 	if err != nil {
 		return fmt.Errorf("open cgroup procs file: %w", err)
 	}
 	defer cgroupProcFile.Close()
 
 	_, err = cgroupProcFile.WriteString(strconv.Itoa(pid))
-
 	if err != nil {
 		return fmt.Errorf("add current process to cgroup")
 	}
@@ -60,7 +76,6 @@ func addProcessToCgroup(pid int) error {
 func setMemoryLimits(memoryLimits resources.Memory) error {
 	memoryMaxFilePath := filepath.Join(cgroupPath, "memory.max")
 	memoryMaxFile, err := os.OpenFile(memoryMaxFilePath, os.O_WRONLY, 0)
-
 	if err != nil {
 		return fmt.Errorf("open memory.max file: %w", err)
 	}
@@ -78,7 +93,6 @@ func setMemoryLimits(memoryLimits resources.Memory) error {
 
 	memorySwapMaxFilePath := filepath.Join(cgroupPath, "memory.swap.max")
 	memorySwapMaxFile, err := os.OpenFile(memorySwapMaxFilePath, os.O_WRONLY, 0)
-
 	if err != nil {
 		return fmt.Errorf("open memory.swap.max file: %w", err)
 	}
@@ -93,6 +107,5 @@ func setMemoryLimits(memoryLimits resources.Memory) error {
 	if err != nil {
 		return fmt.Errorf("set memory swap max limit")
 	}
-
 	return nil
 }

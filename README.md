@@ -20,7 +20,7 @@ The project aims to build a minimal container from scratch without relying on ex
 ### 1. Download the Alpine miniroot filesystem
 
 ```bash
-./scripts/setup-rootfs.sh
+./scripts/pull-rootfs.sh
 ```
 
 This downloads the Alpine Mini RootFS and extracts it into the `rootfs/` directory.

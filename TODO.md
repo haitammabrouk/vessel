@@ -4,7 +4,6 @@ Working today: PID + mount namespaces + uts namespaces, cgroup v2 memory limits,
 rootfs switch, hardcoded `/bin/ash` launch.
 
 ## 1. Namespace isolation (currently only PID + mount)
-- [ ] Add `CLONE_NEWIPC` — isolate SysV IPC / POSIX message queues
 - [ ] Add `CLONE_NEWNET` — container currently shares the host network stack entirely
 - [ ] Add `CLONE_NEWUSER` + UID/GID mapping (`/proc/<pid>/uid_map`, `gid_map`) — needed
       for rootless operation
