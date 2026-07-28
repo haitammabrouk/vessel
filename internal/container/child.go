@@ -1,11 +1,10 @@
 package container
 
 import (
-	"fmt"
 	"os"
 	"os/exec"
 	"vessel/internal/cgroup"
-	"golang.org/x/sys/unix"
+	"vessel/internal/hostname"
 )
 
 func Child() error {
@@ -13,8 +12,8 @@ func Child() error {
 		return err
 	}
 
-	if err := unix.Sethostname([]byte("vessel")); err != nil {
-		return fmt.Errorf("set hostname: %w", err)
+	if err := hostname.SetHostname(); err != nil {
+		return err
 	}
 
 	cmd := exec.Command("/bin/ash")

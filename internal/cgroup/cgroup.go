@@ -10,7 +10,7 @@ import (
 	"golang.org/x/sys/unix"
 )
 
-const cgroupFs = "/sys/fs/cgroup/vessel"
+const cgroupFs = "/sys/fs/cgroup"
 var cgroupPath string
 
 func SetUpCgroup(pid int) error {
