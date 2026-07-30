@@ -6,10 +6,9 @@ import (
 	"vessel/internal/id"
 )
 
-func SetHostname() error {
-	id := id.GetShortHandId(id.GenerateRandomId())
-
-	if err := unix.Sethostname([]byte(id)); err != nil {
+func SetHostname(containerId string) error {
+	shortId := id.GetShortHandId(containerId)
+	if err := unix.Sethostname([]byte(shortId)); err != nil {
 		return fmt.Errorf("set hostname: %w", err)
 	}
 	return nil
