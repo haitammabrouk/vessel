@@ -1,111 +1,58 @@
 package cgroup
 
 import (
+	"context"
 	"fmt"
-	"os"
-	"path/filepath"
-	"strconv"
-	"vessel/internal/cgroup/resources"
 	"vessel/internal/cli"
-	"golang.org/x/sys/unix"
+	sdbus "github.com/coreos/go-systemd/v22/dbus"
+	"github.com/godbus/dbus/v5"
 )
 
-const cgroupFs = "/sys/fs/cgroup"
-var cgroupPath string
-
-func SetUpCgroup(pid int) error {
-	if err := setCgroupControllers(); err != nil {
-		return err
-	}
-
-	cgroupPath = filepath.Join(cgroupFs, "mycgroup")
-	if err := os.MkdirAll(cgroupPath, 0700); err != nil {
-		return fmt.Errorf("create cgroup: %w", err)
-	}
-
-	err := addProcessToCgroup(pid)
+// setUpUnitScopeProps set unit scope properties
+func setUpUnitScopeProps(pid int) ([]sdbus.Property, error){
+	limits, err := cli.ParseOptions()
 	if err != nil {
-		return err
+		return nil, err
 	}
-
-	resourceLimits, err := cli.ParseOptions()
-	if err != nil {
-		return err
-	}
-
-	if err = setMemoryLimits(resourceLimits.Memory); err != nil {
-		return err
-	}
-
-	if err = unix.Unshare(unix.CLONE_NEWCGROUP); err != nil {
-		return fmt.Errorf("unshare cgroup: %w", err)
-	}
-
-	return nil
+	return []sdbus.Property{
+		sdbus.PropSlice("system.slice"),
+		sdbus.PropPids(uint32(pid)),
+		sdbus.PropDescription("vessel container scope"),
+		{
+			Name: "MemoryMax",
+			Value: dbus.MakeVariant(uint64(limits.Memory.Max)),
+		},
+		{
+			Name: "MemorySwapMax",
+			Value: dbus.MakeVariant(uint64(limits.Memory.SwapMax)),
+		},
+	}, nil
 }
 
-func setCgroupControllers() error {
-	subTreeControllersPath := filepath.Join(cgroupFs, "cgroup.subtree_control")
-	subTreeControllersFile, err := os.OpenFile(subTreeControllersPath, os.O_WRONLY, 0)
+// CreateUnitScope creates the unit scope for the container
+func CreateUnitScope(containerId string, hostPid int) error {
+	ctx := context.Background()
+	// connect to systemd
+	conn, err := sdbus.NewSystemConnectionContext(ctx)
 	if err != nil {
-		return fmt.Errorf("open cgroup's parent subtree controllers file: %w", err)
+		return fmt.Errorf("cannot connect to systemd :%w", err)
 	}
-	defer subTreeControllersFile.Close()
+	defer conn.Close()
 
-	if _, err = subTreeControllersFile.WriteString("+memory"); err != nil {
-		return fmt.Errorf("set cgroup controllers: %w", err)
-	}
-	return nil
-}
-
-func addProcessToCgroup(pid int) error {
-	cgroupProcFilePath := filepath.Join(cgroupPath, "cgroup.procs")
-	cgroupProcFile, err := os.OpenFile(cgroupProcFilePath, os.O_WRONLY, 0)
+	unitName := fmt.Sprintf("vessel-%s.scope", containerId)
+	ch := make(chan string)
+	props, err := setUpUnitScopeProps(hostPid)
 	if err != nil {
-		return fmt.Errorf("open cgroup procs file: %w", err)
-	}
-	defer cgroupProcFile.Close()
-
-	_, err = cgroupProcFile.WriteString(strconv.Itoa(pid))
-	if err != nil {
-		return fmt.Errorf("add current process to cgroup")
-	}
-	return nil
-}
-
-func setMemoryLimits(memoryLimits resources.Memory) error {
-	memoryMaxFilePath := filepath.Join(cgroupPath, "memory.max")
-	memoryMaxFile, err := os.OpenFile(memoryMaxFilePath, os.O_WRONLY, 0)
-	if err != nil {
-		return fmt.Errorf("open memory.max file: %w", err)
-	}
-	defer memoryMaxFile.Close()
-
-	if memoryLimits.Max == 0 {
-		_, err = memoryMaxFile.WriteString("max")
-	} else {
-		_, err = memoryMaxFile.WriteString(strconv.FormatInt(memoryLimits.Max, 10))
+		return err
 	}
 
-	if err != nil {
-		return fmt.Errorf("set memory max limit")
+	if _, err := conn.StartTransientUnitContext(ctx, unitName, "fail", props, ch); err != nil {
+		return fmt.Errorf("send unit creation job to systemd :%w", err)
 	}
 
-	memorySwapMaxFilePath := filepath.Join(cgroupPath, "memory.swap.max")
-	memorySwapMaxFile, err := os.OpenFile(memorySwapMaxFilePath, os.O_WRONLY, 0)
-	if err != nil {
-		return fmt.Errorf("open memory.swap.max file: %w", err)
-	}
-	defer memorySwapMaxFile.Close()
-
-	if memoryLimits.SwapMax == 0 {
-		_, err = memorySwapMaxFile.WriteString("max")
-	} else {
-		_, err = memorySwapMaxFile.WriteString(strconv.FormatInt(memoryLimits.SwapMax, 10))
-	}
-
-	if err != nil {
-		return fmt.Errorf("set memory swap max limit")
+	resp := <-ch
+	if resp != "done" {
+		return fmt.Errorf("cannot create unit scope for container :%w", err)
 	}
 	return nil
 }

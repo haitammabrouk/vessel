@@ -17,12 +17,12 @@ rootfs switch, hardcoded `/bin/ash` launch.
 ## 3. Cgroups — fix existing gaps before adding more controllers
 - [ ] `cgroupPath` is hardcoded to `mycgroup` (`internal/cgroup/cgroup.go:17`) —
       concurrent containers collide on the same cgroup; generate a unique ID per run,
-      (Take a look at system.slice)l
+      (Take a look at system.slice)
 - [ ] Nothing removes the cgroup directory on exit — dirs leak on every run
 - [ ] `cgroup.SetUpCgroup` calls `cli.ParseOptions()` itself instead of receiving
       limits as a parameter (`internal/cgroup/cgroup.go:27`) — reversed dependency,
       re-parses `os.Args` a second time in the child process; pass
-      `resources.ResouceLimits` in from `Child()` instead
+      `resources.Limits` in from `Child()` instead
 - [ ] Add CPU limits (`cpu.max`) and `pids.max` (fork-bomb protection)
 - [ ] Add cgroup v1 fallback/detection, or fail with a clear error on v1-only hosts
 

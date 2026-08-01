@@ -13,6 +13,3 @@ func SetUpNs() *unix.SysProcAttr {
 		Cloneflags: cloneFlags,
 	}
 }
-
-
-

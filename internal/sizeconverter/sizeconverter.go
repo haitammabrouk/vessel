@@ -6,13 +6,13 @@ import (
 	"strconv"
 )
 
-func ConvertSize(size string) (int64, error) {
+func ConvertSize(size string) (uint64, error) {
 	size = strings.TrimSpace(strings.ToLower(size))
 	if size == "" {
 		return 0, nil
 	}
 
-	multiplier := int64(1)
+	multiplier := uint64(1)
 	
 	switch {
 	case strings.HasSuffix(size, "k"):
@@ -26,11 +26,10 @@ func ConvertSize(size string) (int64, error) {
 		size = strings.TrimSuffix(size, "g")
 	}
 
-	sizeInBytes, err := strconv.ParseInt(size, 10, 64)
+	sizeInBytes, err := strconv.ParseUint(size, 10, 64)
 	if err != nil {
 		return 0, fmt.Errorf("convert to bytes: %w", err)
 	}
 
 	return sizeInBytes * multiplier, nil
-
 }

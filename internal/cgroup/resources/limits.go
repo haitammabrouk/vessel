@@ -1,10 +1,10 @@
 package resources
 
 type Memory struct {
-	Max     int64
-	SwapMax int64
+	Max     uint64
+	SwapMax uint64
 }
 
-type ResouceLimits struct {
+type Limits struct {
 	Memory Memory
 }

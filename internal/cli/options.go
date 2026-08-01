@@ -8,7 +8,7 @@ import (
 	"vessel/internal/sizeconverter"
 )
 
-func ParseOptions() (resources.ResouceLimits, error) {
+func ParseOptions() (resources.Limits, error) {
 	memoryMax := flag.String("memory", "", "memory limit")
 	memorySwapMax := flag.String("memory-swap-max", "", "memory swap max")
 
@@ -16,14 +16,14 @@ func ParseOptions() (resources.ResouceLimits, error) {
 
 	memoryMaxInBytes, err := sizeconverter.ConvertSize(*memoryMax)
 	if err != nil {
-		return resources.ResouceLimits{}, fmt.Errorf("convert memory max to bytes: %w", err)
+		return resources.Limits{}, fmt.Errorf("convert memory max to bytes: %w", err)
 	}
 	memorySwapMaxInBytes, err := sizeconverter.ConvertSize(*memorySwapMax)
 	if err != nil {
-		return resources.ResouceLimits{}, fmt.Errorf("convert memory swap max to bytes: %w", err)
+		return resources.Limits{}, fmt.Errorf("convert memory swap max to bytes: %w", err)
 	}
 
-	return resources.ResouceLimits{
+	return resources.Limits{
 		Memory: resources.Memory{
 			Max: memoryMaxInBytes,
 			SwapMax: memorySwapMaxInBytes,

@@ -7,6 +7,13 @@ import (
 	"path/filepath"
 )
 
+func unshareCgroupNs() error {
+	if err := unix.Unshare(unix.CLONE_NEWCGROUP); err != nil {
+		return fmt.Errorf("unshare cgroup: %w", err)
+	}
+	return nil
+}
+
 func bindMountRootFs(newRootFsPath string) error {
 	if err := unix.Mount(newRootFsPath, newRootFsPath, "", unix.MS_BIND | unix.MS_REC, ""); err != nil {
 		return fmt.Errorf("bind new rootfs: %w", err)
@@ -69,6 +76,10 @@ func setUpRootFs() error {
 	}
 
 	if err := mountProcFs(); err != nil {
+		return err
+	}
+
+	if err := unshareCgroupNs(); err != nil {
 		return err
 	}
 
