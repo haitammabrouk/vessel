@@ -7,6 +7,7 @@ import (
 	"vessel/internal/cgroup"
 	"vessel/internal/id"
 	"vessel/internal/metadata"
+	"vessel/internal/cli"
 	"time"
 )
 
@@ -27,8 +28,13 @@ func Run() error {
 
 	r.Close()
 
+	limits, err := cli.ParseOptions()
+	if err != nil {
+		return err
+	}
+
 	hostPid := cmd.Process.Pid
-	if err := cgroup.CreateUnitScope(containerId, hostPid); err != nil {
+	if err := cgroup.CreateUnitScope(containerId, hostPid, limits); err != nil {
 		return err
 	}
 	

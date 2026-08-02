@@ -6,7 +6,7 @@ import (
 	"vessel/internal/hostname"
 )
 
-func Child() error {
+func Child(containerId string) error {
 	r := os.NewFile(3, "sync")
 	buff := make([]byte, 2)
 	r.Read(buff)
@@ -17,7 +17,7 @@ func Child() error {
 	cmd.Stdout = os.Stdout
 	cmd.Stderr = os.Stderr
 
-	if err := hostname.SetHostname(); err != nil {
+	if err := hostname.SetHostname(containerId); err != nil {
 		return err
 	}
 

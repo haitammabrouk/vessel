@@ -13,7 +13,8 @@ func main() {
     case "run":
         err = container.Run()
     case "child":
-        err = container.Child()
+		containerId := os.Args[2]
+        err = container.Child(containerId)
 	default :
 		fmt.Println("invalid command")
 		os.Exit(1)

@@ -3,18 +3,13 @@ package cgroup
 import (
 	"context"
 	"fmt"
-	"vessel/internal/cli"
 	sdbus "github.com/coreos/go-systemd/v22/dbus"
 	"github.com/godbus/dbus/v5"
+	"vessel/internal/cgroup/resources"
 )
 
 // setUpUnitScopeProps set unit scope properties
-func setUpUnitScopeProps(pid int) ([]sdbus.Property, error){
-	limits, err := cli.ParseOptions()
-	if err != nil {
-		return nil, err
-	}
-
+func setUpUnitScopeProps(pid int, limits resources.Limits) ([]sdbus.Property, error){
 	props := []sdbus.Property{
 		sdbus.PropSlice("system.slice"),
 		sdbus.PropPids(uint32(pid)),
@@ -31,7 +26,7 @@ func setUpUnitScopeProps(pid int) ([]sdbus.Property, error){
 }
 
 // CreateUnitScope creates the unit scope for the container
-func CreateUnitScope(containerId string, hostPid int) error {
+func CreateUnitScope(containerId string, hostPid int, limits resources.Limits) error {
 	ctx := context.Background()
 	// connect to systemd
 	conn, err := sdbus.NewSystemConnectionContext(ctx)
@@ -42,7 +37,7 @@ func CreateUnitScope(containerId string, hostPid int) error {
 
 	unitName := fmt.Sprintf("vessel-%s.scope", containerId)
 	ch := make(chan string)
-	props, err := setUpUnitScopeProps(hostPid)
+	props, err := setUpUnitScopeProps(hostPid, limits)
 	if err != nil {
 		return err
 	}
