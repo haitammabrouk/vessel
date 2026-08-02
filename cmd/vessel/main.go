@@ -15,6 +15,8 @@ func main() {
     case "child":
 		containerId := os.Args[2]
         err = container.Child(containerId)
+	case "ps":
+        err = container.ListContainers()
 	default :
 		fmt.Println("invalid command")
 		os.Exit(1)
