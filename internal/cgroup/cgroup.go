@@ -14,19 +14,20 @@ func setUpUnitScopeProps(pid int) ([]sdbus.Property, error){
 	if err != nil {
 		return nil, err
 	}
-	return []sdbus.Property{
+
+	props := []sdbus.Property{
 		sdbus.PropSlice("system.slice"),
 		sdbus.PropPids(uint32(pid)),
 		sdbus.PropDescription("vessel container scope"),
-		{
+	}
+	
+	if limits.Memory.Max > 0 {
+		props = append(props, sdbus.Property{
 			Name: "MemoryMax",
-			Value: dbus.MakeVariant(uint64(limits.Memory.Max)),
-		},
-		{
-			Name: "MemorySwapMax",
-			Value: dbus.MakeVariant(uint64(limits.Memory.SwapMax)),
-		},
-	}, nil
+			Value: dbus.MakeVariant(limits.Memory.Max),
+		})
+	}
+	return props, nil
 }
 
 // CreateUnitScope creates the unit scope for the container
