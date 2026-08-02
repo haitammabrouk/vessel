@@ -6,20 +6,35 @@ import (
 	"os"
 	"vessel/internal/cgroup/resources"
 	"vessel/internal/sizeconverter"
+	"strconv"
+	"strings"
 )
 
 func ParseOptions() (resources.Limits, error) {
-	memoryMax := flag.String("memory", "", "memory limit")
+	memoryMaxParam := flag.String("memory", "", "maximum memory to be used by the unit")
+	pidsMaxParam := flag.String("pids-max", "", "maximum tasks that can run in the unit")
 
 	flag.CommandLine.Parse(os.Args[2:])
 
-	memoryMaxInBytes, err := sizeconverter.ConvertSize(*memoryMax)
+	memoryMax, err := sizeconverter.ConvertSize(*memoryMaxParam)
 	if err != nil {
-		return resources.Limits{}, fmt.Errorf("convert memory max to bytes: %w", err)
+		return resources.Limits{}, fmt.Errorf("cannot convert memory max: %w", err)
+	}
+
+	var pidsMax uint64
+	if strings.TrimSpace(*pidsMaxParam) != "" {
+		pidsMax, err = strconv.ParseUint(*pidsMaxParam, 10, 64)
+		if err != nil {
+			return resources.Limits{}, fmt.Errorf("cannot convert pids max: %w", err)
+		}
 	}
 
 	return resources.Limits{
 		Memory: resources.Memory{
-			Max: memoryMaxInBytes,
-		}}, nil
+			Max: memoryMax,
+		},
+		Pids: resources.Pids{
+			Max: pidsMax,
+		},
+	}, nil
 }

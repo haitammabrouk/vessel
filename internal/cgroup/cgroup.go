@@ -22,6 +22,13 @@ func setUpUnitScopeProps(pid int, limits resources.Limits) ([]sdbus.Property, er
 			Value: dbus.MakeVariant(limits.Memory.Max),
 		})
 	}
+
+	if limits.Pids.Max > 0 {
+		props = append(props, sdbus.Property{
+			Name: "TasksMax",
+			Value: dbus.MakeVariant(limits.Pids.Max),
+		})
+	}
 	return props, nil
 }
 

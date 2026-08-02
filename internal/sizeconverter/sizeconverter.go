@@ -11,7 +11,6 @@ func ConvertSize(size string) (uint64, error) {
 	if size == "" {
 		return 0, nil
 	}
-
 	multiplier := uint64(1)
 	
 	switch {
