@@ -21,6 +21,7 @@ func StopContainer(containerId string) error {
 			if err := cgroup.StopUnitScope(entry.Name()); err != nil {
 				return err
 			}
+			break
 		}
 	}
 
