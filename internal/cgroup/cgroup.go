@@ -59,3 +59,26 @@ func CreateUnitScope(containerId string, hostPid int, limits resources.Limits) e
 	}
 	return nil
 }
+
+func StopUnitScope(containerId string) error {
+	ctx := context.Background()
+	// connect to systemd
+	conn, err := sdbus.NewSystemConnectionContext(ctx)
+	if err != nil {
+		return fmt.Errorf("cannot connect to systemd :%w", err)
+	}
+	defer conn.Close()
+	
+	unitName := fmt.Sprintf("vessel-%s.scope", containerId)
+	ch := make(chan string)
+
+	if _, err := conn.StopUnitContext(ctx, unitName, "fail", ch); err != nil {
+		return fmt.Errorf("send unit stop job to systemd: %w", err)
+	}
+
+	resp := <-ch
+	if resp != "done" {
+		return fmt.Errorf("cannot stop unit scope for container :%w", err)
+	}
+	return nil
+}

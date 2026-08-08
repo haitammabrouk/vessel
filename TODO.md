@@ -90,7 +90,7 @@ longer usable on non-systemd init systems (see §3).
       output and bounds-checked parsing
 - [x] ~~Container identity: name/ID generation~~ — `internal/id` generates a
       random 256-bit hex ID per run, used as the container's hostname
-- [ ] `vessel ps` / `vessel stop <id>` — now has metadata (`config.json`) and a
+- [x]  `vessel ps` / `vessel stop <id>` — now has metadata (`config.json`) and a
       real systemd unit name (`vessel-<id>.scope`) to build on; `ps` could
       list `/var/lib/vessel/containers/*`, `stop` could `systemctl stop` the
       matching scope directly instead of signaling a raw PID

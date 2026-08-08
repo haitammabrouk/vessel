@@ -17,13 +17,15 @@ func main() {
         err = container.Child(containerId)
 	case "ps":
         err = container.ListContainers()
+	case "stop":
+		containerId := os.Args[2]
+        err = container.StopContainer(containerId)
 	default :
 		fmt.Println("invalid command")
 		os.Exit(1)
     }
 
 	if err != nil {
-		fmt.Fprintf(os.Stderr, "init container failed: %v\n", err)
 		os.Exit(1)
 	}
 }
