@@ -7,7 +7,7 @@ import (
 	"path/filepath"
 )
 
-const metadataPath = "/var/lib/vessel/containers"
+const MetadataPath = "/var/lib/vessel/containers"
 var configPath string
 
 type Config struct {
@@ -38,14 +38,14 @@ func InitContainerConfig(id, created string) error {
 }
 
 func setUpMetadataPath() error {
-	if err := os.MkdirAll(metadataPath, 0700); err != nil {
+	if err := os.MkdirAll(MetadataPath, 0700); err != nil {
 		return fmt.Errorf("create metadata dir for containers: %w", err)
 	}
 	return nil
 }
 
 func (cfg *Config) setUpConfigDir() error {
-	configPath = filepath.Join(metadataPath, cfg.ID)
+	configPath = filepath.Join(MetadataPath, cfg.ID)
 	if err := os.MkdirAll(configPath, 0700); err != nil {
 		return fmt.Errorf("create config dir for container: %w", err)
 	}

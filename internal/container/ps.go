@@ -4,12 +4,11 @@ import (
 	"os"
 	"fmt"
 	"vessel/internal/id"
+	"vessel/internal/metadata"
 )
 
-const metadataPath = "/var/lib/vessel/containers"
-
 func ListContainers() error {
-	metadataDir, err := os.ReadDir(metadataPath)
+	metadataDir, err := os.ReadDir(metadata.MetadataPath)
 	if err != nil {
 		return err
 	}

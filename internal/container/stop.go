@@ -5,10 +5,11 @@ import (
 	"os"
 	"strings"
 	"vessel/internal/cgroup"
+	"vessel/internal/metadata"
 )
 
 func StopContainer(containerId string) error {
-	metadataDir, err := os.ReadDir(metadataPath)
+	metadataDir, err := os.ReadDir(metadata.MetadataPath)
 	isFound := false
 	if err != nil {
 		return err
