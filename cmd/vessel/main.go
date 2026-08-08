@@ -26,6 +26,7 @@ func main() {
     }
 
 	if err != nil {
+		fmt.Printf("%v\n", err)
 		os.Exit(1)
 	}
 }

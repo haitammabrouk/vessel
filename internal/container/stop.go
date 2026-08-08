@@ -5,28 +5,41 @@ import (
 	"os"
 	"strings"
 	"vessel/internal/cgroup"
+	"vessel/internal/id"
 	"vessel/internal/metadata"
 )
 
 func StopContainer(containerId string) error {
+	if strings.TrimSpace(containerId) == "" {
+		return fmt.Errorf("no container id is provided")
+	}
 	metadataDir, err := os.ReadDir(metadata.MetadataPath)
-	isFound := false
 	if err != nil {
 		return err
 	}
-
+	
+	matchedIds := make([]string, 0)
 	for _, entry := range metadataDir {
 		if strings.HasPrefix(entry.Name(), containerId) {
-			isFound = true
-			if err := cgroup.StopUnitScope(entry.Name()); err != nil {
-				return err
-			}
-			break
+			matchedIds = append(matchedIds, entry.Name())
 		}
 	}
 
-	if !isFound {
-		fmt.Printf("cannot find a container with id: %s", containerId)
+	shortedIds := make([]string, 0)
+	for _, entry := range matchedIds {
+		shortedIds = append(shortedIds, id.GetShortHandId(entry))
 	}
+
+	if len(matchedIds) == 1 {
+		if err := cgroup.StopUnitScope(matchedIds[0]); err != nil {
+			return err
+		}
+	} else if len(matchedIds) > 1 {
+		return fmt.Errorf("container id %s is ambiguous, matched multiple containers:\n%s\nprovide more characters to disambiguate",
+    			containerId, strings.Join(shortedIds, "\n"))
+	} else {
+		return fmt.Errorf("cannot find a container with id: %s", containerId)
+	}
+
 	return nil
 }
