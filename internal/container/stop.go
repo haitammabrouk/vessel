@@ -31,7 +31,11 @@ func StopContainer(containerId string) error {
 	}
 
 	if len(matchedIds) == 1 {
-		if err := cgroup.StopUnitScope(matchedIds[0]); err != nil {
+		matchedId := matchedIds[0]
+		if err := cgroup.StopUnitScope(matchedId); err != nil {
+			return err
+		}
+		if err := metadata.CleanContainerConfig(matchedId); err != nil {
 			return err
 		}
 	} else if len(matchedIds) > 1 {

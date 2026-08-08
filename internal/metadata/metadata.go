@@ -64,3 +64,11 @@ func (cfg *Config) writeConfigInfos() error {
 	}
 	return nil
 }
+
+func CleanContainerConfig(containerId string) error {
+	configPath = filepath.Join(MetadataPath, containerId)
+	if err := os.RemoveAll(configPath); err != nil {
+		return err
+	}
+	return nil
+}
